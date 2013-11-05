@@ -1,0 +1,7 @@
+name = Commerce Quick add
+description = Adds a quick add form to the commerce cart page
+core = 7.x
+package = Commerce
+version = 7.x-1.0
+project = commerce_quickadd
+dependencies[] = commerce

@@ -1,0 +1,127 @@
+<?php
+/**
+ * @file
+ * Commerce quick add to cart.
+ */
+
+
+/**
+ * Implements hook_block_info().
+ */
+function commerce_quickadd_block_info() {
+  $blocks['commerce_quickadd'] = array(
+    'info' => t('Quick add'), 
+    'cache' => DRUPAL_NO_CACHE,
+  );
+
+  return $blocks;
+}
+
+
+/**
+ * Implements hook_block_view().
+ */
+function commerce_quickadd_block_view($delta = '') {
+  $block = array();
+
+  switch ($delta) {
+    case 'commerce_quickadd':
+      return array(
+        'subject' => t('Quick add'),
+        'content' => contactblock_get_contact_form(),
+      );
+      break;
+
+  }
+  return $block;
+}
+
+
+/**
+ * Implements hook_menu().
+ */
+function commerce_quickadd_menu() {
+  $items['quickaddtocart-autocomplete-engine'] = array(
+    'page callback' => 'commerce_quickadd_autocomplete',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+function contactblock_get_contact_form() {
+  form_load_include($form_state, 'module', 'commerce_quickadd');
+  $form = drupal_get_form('commerce_quickadd_form');
+  $output = drupal_render($form);
+
+  return $output;
+}
+
+function commerce_quickadd_form($form, &$form_state) {
+  $form = array();
+  $form['product_id'] = array(
+    '#title' => t('Art no'),
+    '#type' => 'textfield',
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'quickaddtocart-autocomplete-engine',
+  );
+
+  $form['quantity'] = array(
+    '#title' => t('Quantity'),
+    '#type' => 'textfield',
+    '#datatype' => 'integer',
+    '#default_value' => 1,
+    '#maxlength' => 2,
+    '#size' => 1,
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+
+  $form['description'] = array(
+    '#markup' => '<div class="quickadd-description">' . t('Add products directly to your cart by enetering the article number and quantity and click the add to cart button.') . '</div>',
+  );
+
+  $form['#validate'] = array('commerce_quickadd_form_validate');
+  $form['#submit'] = array('commerce_quickadd_form_submit');
+
+  return $form;
+}
+
+function commerce_quickadd_form_validate($form, &$form_state) {
+  // Check to ensure the quantity is valid.
+  if (!is_numeric($form_state['values']['quantity']) || $form_state['values']['quantity'] <= 0) {
+    form_set_error('quantity', t('You must specify a valid quantity to add to the cart.'));
+  }
+}
+
+function commerce_quickadd_form_submit($form, &$form_state) {
+  // Remove SKU part of product id.
+  $values = explode(' (id: ', $form_state['values']['product_id']);
+  $product_id = trim($values[1], ')');
+
+  global $user;
+  $quantity = $form_state['values']['quantity'];
+  commerce_cart_product_add_by_id($product_id, $quantity, TRUE, $user->uid);
+}
+
+function commerce_quickadd_autocomplete($text) {
+  // We just need the sku and product id.
+  $results = array();
+  $query = db_select('commerce_product', 'cp');
+  $query
+      ->condition('cp.sku', '%' . db_like($text) . '%', 'LIKE')
+      ->fields('cp', array('product_id', 'sku'))
+      ->orderBy('sku', 'ASC');
+  $records = $query->execute();
+
+  foreach ($records as $record) {
+    $key = "$record->sku (id: $record->product_id)";
+    $results[$key] = '<div class="reference-autocomplete">' . $record->sku . '</div>';
+  }
+
+  drupal_json_output($results);
+}
