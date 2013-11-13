@@ -28,7 +28,7 @@ function commerce_quickadd_block_view($delta = '') {
     case 'commerce_quickadd':
       return array(
         'subject' => t('Quick add'),
-        'content' => contactblock_get_contact_form(),
+        'content' => commerce_quickadd_get_quickadd_form(),
       );
       break;
 
@@ -50,7 +50,7 @@ function commerce_quickadd_menu() {
   return $items;
 }
 
-function contactblock_get_contact_form() {
+function commerce_quickadd_get_quickadd_form() {
   form_load_include($form_state, 'module', 'commerce_quickadd');
   $form = drupal_get_form('commerce_quickadd_form');
   $output = drupal_render($form);
