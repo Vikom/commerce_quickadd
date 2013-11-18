@@ -41,6 +41,15 @@ function commerce_quickadd_block_view($delta = '') {
  * Implements hook_menu().
  */
 function commerce_quickadd_menu() {
+  $items['admin/commerce/config/quickadd'] = array(
+    'title' => 'Commerce Quick add form settings',
+    'description' => 'Adds a Quick add to cart block.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('commerce_quickadd_admin_settings_form'),
+    'access arguments' => array('administer commerce_quickadd'),
+    'type' => MENU_NORMAL_ITEM,
+    'file' => 'commerce_quickadd.admin.inc',
+  );
   $items['quickaddtocart-autocomplete-engine'] = array(
     'page callback' => 'commerce_quickadd_autocomplete',
     'access callback' => TRUE,
@@ -59,9 +68,11 @@ function commerce_quickadd_get_quickadd_form() {
 }
 
 function commerce_quickadd_form($form, &$form_state) {
-  $form = array();
-  $form['product_id'] = array(
-    '#title' => t('Art no'),
+  $addby = variable_get('commerce_quickadd_addby');
+  $product_title = ($addby == 'sku') ? 'Product SKU' : 'Product title';
+
+  $form['product'] = array(
+    '#title' => t($product_title),
     '#type' => 'textfield',
     '#maxlength' => 60,
     '#autocomplete_path' => 'quickaddtocart-autocomplete-engine',
@@ -78,7 +89,7 @@ function commerce_quickadd_form($form, &$form_state) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Submit',
+    '#value' => 'Add to cart',
   );
 
   $form['description'] = array(
@@ -99,8 +110,8 @@ function commerce_quickadd_form_validate($form, &$form_state) {
 }
 
 function commerce_quickadd_form_submit($form, &$form_state) {
-  // Remove SKU part of product id.
-  $values = explode(' (id: ', $form_state['values']['product_id']);
+  // Remove Title/SKU part of product id.
+  $values = explode(' (id: ', $form_state['values']['product']);
   $product_id = trim($values[1], ')');
 
   global $user;
@@ -109,18 +120,26 @@ function commerce_quickadd_form_submit($form, &$form_state) {
 }
 
 function commerce_quickadd_autocomplete($text) {
-  // We just need the sku and product id.
+  $addby = variable_get('commerce_quickadd_addby');
+
+  // We just need the Title/SKU and product id.
   $results = array();
   $query = db_select('commerce_product', 'cp');
   $query
       ->condition('cp.sku', '%' . db_like($text) . '%', 'LIKE')
-      ->fields('cp', array('product_id', 'sku'))
-      ->orderBy('sku', 'ASC');
+      ->fields('cp', array('product_id', $addby))
+      ->orderBy($addby, 'ASC');
   $records = $query->execute();
 
   foreach ($records as $record) {
-    $key = "$record->sku (id: $record->product_id)";
-    $results[$key] = '<div class="reference-autocomplete">' . $record->sku . '</div>';
+    if ($addby == 'sku') { 
+      $key = "$record->sku (id: $record->product_id)";
+      $results[$key] = '<div class="reference-autocomplete">' . $record->sku . '</div>';
+    }
+    else {
+      $key = "$record->title (id: $record->product_id)";
+      $results[$key] = '<div class="reference-autocomplete">' . $record->title . '</div>';
+    }
   }
 
   drupal_json_output($results);
