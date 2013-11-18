@@ -4,4 +4,5 @@ core = 7.x
 package = Commerce
 version = 7.x-1.0
 project = commerce_quickadd
+configure = admin/commerce/config/quickadd
 dependencies[] = commerce
