@@ -39,7 +39,7 @@ function commerce_quickadd_block_view($delta = '') {
  */
 function commerce_quickadd_menu() {
   $items['admin/commerce/config/quickadd'] = array(
-    'title' => 'Commerce Quick add form settings',
+    'title' => 'Commerce quick add',
     'description' => 'Adds a Quick add to cart block.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('commerce_quickadd_admin_settings_form'),
