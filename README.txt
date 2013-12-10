@@ -20,7 +20,6 @@ Configuration
 -------------
 
 1. Enable the module
-
 2. Put the block where you want it for example at /cart.
 
 
