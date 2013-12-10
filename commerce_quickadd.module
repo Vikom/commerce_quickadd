@@ -65,18 +65,15 @@ function commerce_quickadd_get_quickadd_form() {
 }
 
 function commerce_quickadd_form($form, &$form_state) {
-  $addby = variable_get('commerce_quickadd_addby');
-  $product_title = ($addby == 'sku') ? 'Product SKU' : 'Product title';
-
   $form['product'] = array(
-    '#title' => t($product_title),
+    '#title' => t(variable_get('commerce_quickadd_product_label', 'Product')),
     '#type' => 'textfield',
     '#maxlength' => 60,
     '#autocomplete_path' => 'quickaddtocart-autocomplete-engine',
   );
 
   $form['quantity'] = array(
-    '#title' => t('Quantity'),
+    '#title' => t(variable_get('commerce_quickadd_quantity_label', 'Quantity')),
     '#type' => 'textfield',
     '#datatype' => 'integer',
     '#default_value' => 1,
@@ -86,12 +83,15 @@ function commerce_quickadd_form($form, &$form_state) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => 'Add to cart',
+    '#value' => t(variable_get('commerce_quickadd_submit_value', 'Add to cart')),
   );
 
-  $form['description'] = array(
-    '#markup' => '<div class="quickadd-description">' . t('Add products directly to your cart by enetering the article number and quantity and click the add to cart button.') . '</div>',
-  );
+  $description = variable_get('commerce_quickadd_description', 'Add products directly to your cart by enetering the article number and quantity and click the add to cart button.');
+  if ($description) {
+    $form['description'] = array(
+      '#markup' => '<div class="quickadd-description">' . t($description) . '</div>',
+    );
+  }
 
   $form['#validate'] = array('commerce_quickadd_form_validate');
   $form['#submit'] = array('commerce_quickadd_form_submit');
@@ -117,7 +117,7 @@ function commerce_quickadd_form_submit($form, &$form_state) {
 }
 
 function commerce_quickadd_autocomplete($text) {
-  $addby = variable_get('commerce_quickadd_addby');
+  $addby = variable_get('commerce_quickadd_addby', 'title');
 
   // We just need the Title/SKU and product id.
   $results = array();
@@ -125,6 +125,7 @@ function commerce_quickadd_autocomplete($text) {
   $query
       ->condition('cp.sku', '%' . db_like($text) . '%', 'LIKE')
       ->fields('cp', array('product_id', $addby))
+      ->range(0, variable_get('commerce_quickadd_result_limit', 10))
       ->orderBy($addby, 'ASC');
   $records = $query->execute();
 

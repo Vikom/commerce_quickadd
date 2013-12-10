@@ -1,0 +1,19 @@
+<?php
+
+/**
+ * @file
+ * Uninstall variable data.
+ */
+
+/**
+ * Implements hook_uninstall().
+ */
+function commerce_quickadd_uninstall() {
+  // Delete all variables related to module.
+  variable_del('commerce_quickadd_addby');
+  variable_del('commerce_quickadd_product_label');
+  variable_del('commerce_quickadd_quantity_label');
+  variable_del('commerce_quickadd_submit_value');
+  variable_del('commerce_quickadd_description');
+  variable_del('commerce_quickadd_result_limit');
+}
