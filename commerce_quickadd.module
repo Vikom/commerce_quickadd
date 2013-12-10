@@ -4,7 +4,6 @@
  * Commerce quick add to cart.
  */
 
-
 /**
  * Implements hook_block_info().
  */
@@ -16,7 +15,6 @@ function commerce_quickadd_block_info() {
 
   return $blocks;
 }
-
 
 /**
  * Implements hook_block_view().
@@ -35,7 +33,6 @@ function commerce_quickadd_block_view($delta = '') {
   }
   return $block;
 }
-
 
 /**
  * Implements hook_menu().
