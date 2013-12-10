@@ -75,7 +75,6 @@ function commerce_quickadd_form($form, &$form_state) {
   $form['quantity'] = array(
     '#title' => t(variable_get('commerce_quickadd_quantity_label', 'Quantity')),
     '#type' => 'textfield',
-    '#datatype' => 'integer',
     '#default_value' => 1,
     '#maxlength' => 2,
     '#size' => 1,

@@ -3,6 +3,7 @@ Summary
 
 Commerce Quick add lets users add products to their cart through autocomplete field.
 
+
 Requirements
 ------------
 
@@ -22,7 +23,9 @@ Configuration
 
 2. Put the block where you want it for example at /cart.
 
+
 Author
 ------
 
 Vikom (drupal.org/user/279158)
+kevinn (drupal.org/user/1229220)
